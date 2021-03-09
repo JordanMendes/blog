@@ -1,0 +1,23 @@
+<h1>{{title}}</h1>
+{# Twig est un langage de rendu, un moteur de template, qui permet de traiter et d'afficher les données transmit par le controller sur les différents template #}
+{# Twig est intégrer automatiquement au framework Symfony #}
+{# title : variable TWIG qui est transmit par le controller, par la méthode home() #}
+{# Dans les templates, nous n'avons plus aucune lignes de code de PHP #}
+{# {{ }} -> doucbles accolades, ce que l'on appel l'interpolation #}
+
+{# age : une variable Twig qui est transmise par le controller, via la méthode home() -> render ([]) #}
+
+
+{% if age > 18 %}
+    <p>Tu es majeur!! </p>
+
+{% else %}
+    <p> tu es mineur !! </p>
+
+{% endif %}
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+<hr>
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.

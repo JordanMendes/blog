@@ -1,4 +1,14 @@
-<h1>{{title}}</h1>
+{% extends "base.html.twig" %}
+{# on hérite de notre gabarit de base base.html.twig (header, nav , footer , liens , css ect .. )#}
+{# block : commande twig #}
+
+{# block : commande Twig #}
+{# Le block 'body' fait appel au bloc 'body' définit dans base.html.twig qui permet d'intégrer le contenu du template donc le block 'body' de base.html.twig (entre la nav et le footer)  #}
+
+{% block body %}
+    <div class="container">
+
+<h1 class="display-4 text-center my-5">{{title}}</h1>
 {# Twig est un langage de rendu, un moteur de template, qui permet de traiter et d'afficher les données transmit par le controller sur les différents template #}
 {# Twig est intégrer automatiquement au framework Symfony #}
 {# title : variable TWIG qui est transmit par le controller, par la méthode home() #}
@@ -21,3 +31,5 @@ Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
 <hr>
 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+</div>
+{% endblock %}

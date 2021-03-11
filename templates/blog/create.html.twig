@@ -6,9 +6,18 @@
 
 {% block body %}
 
-    <h1 class="display-4 text-center my-5"> Création d'un nouvel article </h1>
+    <h1 class="display-4 text-center my-5">
+    {# Si la variable editMode renvoie TRUE, cela veut dire que l'id de l'article est définit, c'est une modification #}
+    {% if editMode %}
+        Modification de l'article
+    {% else %}
+        {# Sinon, l'id n'est pas définit, c'est une insertion #}
+        Création d'un nouvel article
+    {% endif %}
 
-    <form method="post" class="">
+    </h1>
+
+    {# <form method="post" class="">
         <div class="form-group">
             <label for="title" class="form-label">Titre</label>
             <input type="text" class="form-control" id="title" name="title">
@@ -25,7 +34,37 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Enregister l'article</button>
-    </form>
+    </form> #}
 
+    {# {{ form(formArticle) }} #}
+    {# fomr_start() : fonction Twig, on ouvre la balise <form> #}
+    {{ form_start(formArticle, {'attr': {'class': 'col-md-5 mx-auto'} }) }}
 
+        {{ form_row(formArticle.title, {
+            'attr': {'placeholder': "Titre de l'article", "maxlength": false, "pattern": false},
+            "label": "Titre de l'article"}) }}
+        {{ form_row(formArticle.content, {
+            'attr': {'placeholder': "Contenu de l'article", 'rows' : 15
+            },
+            'label': "Contenu de l'article"
+            }) 
+        }}
+        {{ form_row(formArticle.image, {
+            'attr': {'placeholder': "Saisir une URL pour l'image", 'rows' : 15
+            },
+            'label': "URL de l'image"
+            }) 
+        }}
+
+        <button type="submit" class="btn btn-secondary">
+        {% if editMode %}
+            Enregister les modifications
+        {% else %}
+            Enregistrer l'article-+
+
+        {% endif %}
+        </button>
+
+    {{ form_end(formArticle) }}
+    {# form_end() : fonction Twig, on ferma la balise <form> #}
 {% endblock %}

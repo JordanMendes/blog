@@ -3,10 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Form\ArticleFormType;
 use App\Repository\ArticleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BlogController extends AbstractController
@@ -58,12 +62,92 @@ class BlogController extends AbstractController
 
     /**
      * @Route("/blog/new", name="blog_create")
+     * @Route("/blog/{id}/edit", name="blog_edit")
      */
-    public function create(Request $request): Response
+    public function create(Article $articleCreate = null, Request $request, EntityManagerInterface $manager): Response
     {
-        dump($request);
+        dump($articleCreate);
 
-        return $this->render('blog/create.html.twig');
+        // Si la variable $articleCreate N'EST PAS, si elle ne contient aucun article de la BDD, cela veut dire nous avons envoyé la route '/blog/new', c'est une insertion, on entre dans le IF et on crée une nouvelle instance de l'entité Article, création d'un nouvel article
+        // Si la variable $articleCreate contient un article de la BDD, cela veut dire que nous avons envoyé la route '/blog/id/edit', c'est une modifiction d'article, on entre pas dans le IF
+        if(!$articleCreate)
+        {
+            $articleCreate = new Article; // setTitle($_POST['title])
+        }
+
+        // $request permet de stocker les données des superglobales , la propriété $request->request permet de stocker les données véhiculées par un formulaire ($_POST), ici on compte si il y a données qui on été saisie dans le formulaire 
+        // if($request->request->count() > 0)
+        // {
+        //     // Pour insérer dans la table Article, nous devons instancier un objet issu de la classe entité Article, qui est lié à la table SQL Article
+        //     $articleCreate = new Article; 
+
+        //     // On renseigne tout les setteurs de l'objet avec en arguments les données du formulaire ($_POST)
+        //     // $articleCreate->setTitle($request->request->get('title'))
+        //     //               ->setContent($request->request->get('content'))
+        //     //               ->setImage($request->request->get('image'))
+        //     //               ->setCreatedAt(new \DateTime);
+
+        //     dump($articleCreate);   // On observer que l'objet entité Article $articleCrate, les propriétés contiennent bien les données du formulaire
+
+        //     // On fait appel au manager afin de pouvoir executer une isertion en BDD
+        //     $manager->persist($articleCreate); // on prépare et grade en mémoire l'insertion
+        //     $manager->flush(); // on execute l'insertion
+
+        //     // Après l'insertion, on redirige l'internaute vers le détail de l'article qui vient d'être inséré en BDD
+        //     // Cela correspond à la route 'blog_show', mais c'est une route paramétrée qui attend un ID dans l'URL
+        //     // En 2ème argument de redirectToRoute, nous transmettons l'ID de l'article qui vient d'être inséré en BDD
+        //     return $this->redirectToRoute('blog_show', [
+        //         'id' => $articleCreate->getId()
+        //     ]);
+        // }
+        //$articleCreate = new Article; // setTitle($_POST['title'])
+
+        // Ici nous renseignons le setter de l'objet et Symfony est capable automatiquemnt d'envoyer les valeurs de l'entité directement dans les attributs 'value' du formulaire, étant donné que l'entité $articleCreate est relié au formulaire
+        // $articleCreate->setTitle("Titre à la con")
+        //               ->setContent("Contenu à la con");
+
+        $form = $this->createForm(ArticleFormType::class, $articleCreate);
+
+        // $articleCreate = new Article;
+
+        // createFormBuilder() méthode de Symfony qui permet de générer un formulaire permettant de remplir une entité $articleCreate
+        // $form = $this->createFormBuilder($articleCreate)
+        //              ->add('title')// add() méthode permettant de générer des champs de formulaire
+        //              ->add('content')
+        //              ->add('image')
+        //              ->getForm(); // permet de valider le formulaire
+        
+        $form = $this->createForm(ArticleFormType::class, $articleCreate);
+
+        // On pioche dans le formulaire la méthode handleRequest() qui permet de récupérer chaque données saisie dans le formulaire ($request) 
+        // et de les bindé, de les transmettre directement dans les bons setteurs de mon entité $articleCreate 
+        // $_POST['title'] --> setTitle($_POST['title'])
+        $form->handleRequest($request);
+
+        dump($articleCreate);
+        
+        // Si le formulaire a bien été soumit et que chaque valeur du formulaire ont bien été transmises dans les bon setter de l'entité (isValid()), 
+        // alors on entre dans le IF et on génère l'insertion
+        if($form->isSubmitted() && $form->isValid())
+        {
+            // On appel le setter de la date, puisque nous n'avons pas de champs date dans le formulaire
+            if(!$articleCreate->getId())
+            {
+                $articleCreate->setCreatedAt(new \DateTime);
+            }
+
+            $manager->persist($articleCreate); // on appel le manager pour préparer la requete d'insertion et la garder en mémoire
+            $manager->flush(); // on execute véritablement la requete d'insertion en BDD
+
+            return $this->redirectToRoute('blog_show', [
+                'id'=> $articleCreate->getId()
+            ]);
+        }
+
+        return $this->render('blog/create.html.twig', [
+            'formArticle' => $form->createView(), // on transmet sur le template le formulaire, createView() retourne un petit objet qui représente l'affichage du formulaire , on le récupère sur le template create.html.twig 
+            'editMode' => $articleCreate->getId() // cela permettra dans le template de savoir si l'article possède un ID ou non , si c'est une insertion ou une modification 
+        ]);
     }
 
     /**

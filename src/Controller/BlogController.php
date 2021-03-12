@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\Comment;
 use App\Form\ArticleFormType;
+use App\Form\CommentFormType;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -156,7 +158,7 @@ class BlogController extends AbstractController
      * 
      * @Route("/blog/{id}", name="blog_show")
      */
-    public function show(Article $article): Response
+    public function show(Article $article, Request $request, EntityManagerInterface $manager): Response
     {
         // $repoArticle est un objet issu de la classe ArticleRepository
         //$repoArticle = $this->getDoctrine()->getRepository(Article::class);
@@ -168,12 +170,41 @@ class BlogController extends AbstractController
         // On transmet à la méthode find() de la classe ArticleRepository l'id recupéré dans l'URL et transmit en argument de la fonction show($id) | $id = 3
         // La méthode find() permet de selectionner en BDD un article par son ID
         //$article = $repoArticle->find($id);
+        $commentCreat = new Comment;
 
-        dump($article);
+        $comment = $this->createForm(CommentFormType::class, $commentCreat);
+
+        $comment->handleRequest($request);
+
+        if($comment->isSubmitted() && $comment->isValid())
+        {
+            /// On entre dans cette condition uniquement dans le cas où nous avons validé le formulaire et que chaque valeur saisie ont bien été transmises au bon setter de l'objet
+
+            $commentCreat->setCreatedAt(new \DateTime)
+                         ->setArticle($article); // on relie le commentaire à l'article
+                         // la méthode setArticle() attend un argument un objet issu de la classe Article, c'est à dire un article de la BDD
+
+            $manager->persist($commentCreat);
+            $manager->flush();
+
+            // Envoi d'un message de validation en session grace a la méthode addFlash()
+            // 1. success : identifiant du message
+            // 2. le message
+            $this->addflash('success', "Le commentaire a bien été posté !");
+
+            return $this->redirectToRoute('blog_show', [
+                'id' =>$article->getId()
+            ]);
+        }
+
+        
+
+        dump($request);
 
         //dump($id); // id=9
         return $this->render('blog/show.html.twig',[
-        'articleTwig' => $article //on envoit sur le template les données selectionnées en BDD, càd les informations d'un article sur l'id de l'url
+        'articleTwig' => $article,//on envoit sur le template les données selectionnées en BDD, càd les informations d'un article sur l'id de l'url
+        'formComment' => $comment->createView()
         ]);
     }
 

@@ -43,6 +43,9 @@
         {{ form_row(formArticle.title, {
             'attr': {'placeholder': "Titre de l'article", "maxlength": false, "pattern": false},
             "label": "Titre de l'article"}) }}
+
+        {{ form_row(formArticle.category, {'label': "Choisir une catégorie"}) }}
+        
         {{ form_row(formArticle.content, {
             'attr': {'placeholder': "Contenu de l'article", 'rows' : 15
             },
@@ -60,7 +63,7 @@
         {% if editMode %}
             Enregister les modifications
         {% else %}
-            Enregistrer l'article-+
+            Enregistrer l'article
 
         {% endif %}
         </button>

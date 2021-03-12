@@ -11,20 +11,71 @@
 
     <h1 class="display-4 text-center my-5">{{ articleTwig.title }}</h1>
 
+    {# app : varaible Twig qui contient toute les informations stockées en session #}
+    {# flashes() : méthode permettant d'accéder aux message utilisateur stockés en session #}
+    {# il peut y avoir plusieurs messages stockés donc nous sommes obligé de boucler #}
+    {% for message in app.flashes('success') %}
+
+      <div class="col-md-5 bg-success p-4 rounded mx-auto text-center text-white mb-3"> {{ message }} </div>
+      {# message est une variable de reception qui contient 1 message utilisateur par tour de boucle #}
+
+    {% endfor %}
+
     <div class="col-md-8 mx-auto">
           <div class="card mb-4 shadow-sm">
           {# replace() : fonction Twig qui permet de remplacer une donnée par une autre ici dans l'URL#}
             <img src="{{ articleTwig.image|replace({'600/400': '1000/300'}) }}" alt="{{ articleTwig.title }}">
 
             <div class="card-body">
-              <p class="card-text">{{ articleTwig.content|striptags }}</p>
+            {# raw : filtre twig qui masque les balises html provenant de la BDD #}
+              <p class="card-text">{{ articleTwig.content|raw }}</p>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
                   <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
                 </div>
-                <small class="text-muted">Posté le {{ articleTwig.createdAt|date('d/m/Y') }} à {{ articleTwig.createdAt| date('H:i:s') }}</small>
+                <small class="text-muted">Posté le {{ articleTwig.createdAt|date('d/m/Y') }} à {{ articleTwig.createdAt| date('H:i:s') }} dans la catégorie <strong>{{ articleTwig.category.title }}</strong></small>
               </div>
+            </div>
+
+            <h4 class="my-5">Donner votre avis...</h4>
+
+            {# On affiche le formulaire d'ajout de commentaires envoyé par BlogController --> show() --> render() #}
+            {{ form_start(formComment)}}
+
+                {{ form_row(formComment.author, {'label': "Nom d'utilisateur"}) }}
+
+                {{ form_row(formComment.content, {'label': "Saisir votre commentaire"}) }}
+
+                <button type="submit" class="btn btn-secondary">Poster votre commentaire</button>
+
+            {{ form_end(formComment) }}
+
+            <h4 class="my-5">Vos réactions...</h4>
+
+            <div class="row bg-light ">
+
+              {# articleTwig.comment : retourne tout les commentaires associés à l'article (relation bi-drectionnelle / relations entre les tables) #}
+              {# plusieurs commentaires sont associés à l'article, donc nous sommes obligé de boucler FOR #}
+
+              {% for comment in articleTwig.comments %}
+
+                {# {{ dump(comment) }} #}
+                <div class="col-md-4 py-2">
+
+                  <span><strong>{{ comment.author}}</strong></span>
+
+                  <small class="font-italic">
+                    Posté le : {{ comment.createdAt|date('d/m/Y') }} à {{ comment.createdAt|date('H:i:s') }}
+                  </small>
+                </div>
+
+                <div class="col-md-8 py-2">
+                    {{ comment.content|striptags }}
+                </div>
+                <hr class="col-md-10 bg-light">
+              {% endfor %}
+
             </div>
           </div>
         </div>

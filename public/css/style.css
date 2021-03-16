@@ -2,3 +2,11 @@
 {
     min-height: 85vh;
 }
+
+.img-admin-articles{
+    width: 200px !important;
+}
+
+tr,td {
+    vertical-align: middle !important;
+}

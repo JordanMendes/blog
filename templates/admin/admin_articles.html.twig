@@ -1,0 +1,62 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    BACKOFFICE | Gestion des articles
+{% endblock %}
+
+{% block body %}
+    <h1 class="display-4 text-center my-5">BACKOFFICE | Gestion des articles</h1>
+    {% for message in app.flashes('success') %}
+        <div class="col-md-3 bg-success p-4 rounded mx-auto text-center text-white mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <table class="table table-bordered text-center">
+
+        <tr>
+
+            {# colonnes : variable Twig envoyé via AdminController qui contient tout les noms des champs/colonnes de la table Article #}
+            {# oneColonne : variable de reception qui receptionne le nom d'une colonne par tour de boucle FOR #}
+            {% for oneColonne in colonnes %}
+
+                {% if oneColonne == 'createdAt' %}
+
+                    <th>DATE</th>
+
+                {% else %}
+
+                    {# upper :  filtre Twig permettant d'afficher le nom des colonnes en majuscule #}
+                    <th>{{ oneColonne|upper }}</th>
+
+                {% endif %}
+                    
+            {% endfor %}
+
+                <th>CATEGORIES</th>
+                <th>NB COMMENTAIRES</th>
+        </tr>
+        {# articlesBdd : variable Twig envoyé dans le template par AdminController qui contient tout les articles de tabke SQL Article #}
+        {# oneArticle : variable de reception receptionne 1 article de la BDD par tour de boucle FOR#}    
+        {% for oneArticle in articlesBdd %}
+            <tr>
+                <td>{{ oneArticle.id }}</td>
+                <td>{{ oneArticle.title }}</td>
+                <td>{{ oneArticle.content|striptags|slice(0,300) }}...</td>
+                <td><img src="{{ oneArticle.image }}" alt="{{ oneArticle.title }}" class="img-admin-articles"></td>
+                <td>{{ oneArticle.createdAt|date('d/m/Y à H:i:s') }}</td>
+                <td>{{ oneArticle.category.title }}</td>
+                <td>{{ oneArticle.comments|length }}</td>
+                {# Lorsque nous selectionnons les articles ne BDD, nous avons accès à toute les correspondances dans les autres tables #}
+                {# oneArticle.comments : retourne tout lescommentaires de chaque articles #}
+                {# length : filtre twig permettant de calculer la taille d'un ARRAY #}
+                <td>{{ oneArticle.comments|length }}</td>
+
+                <td><a href="{{ path('admin_edit_article', {'id': oneArticle.id}) }}" class="btn btn-info"><i class="fa fa-edit"></i></a></td>
+
+                <td><a href="{{ path('admin_remove_article', {'id': oneArticle.id }) }}" class="btn btn-danger" onclick="return(confirm('Voulez-vous vraiment supprimer cet article?'))"><i class="fas fa-trash-alt" ></i></a></td>
+                
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

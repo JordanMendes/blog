@@ -1,7 +1,18 @@
 security:
+    
+    encoders:
+        App\Entity\User:
+            algorithm: bcrypt
+
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         users_in_memory: { memory: null }
+
+        in_database:
+            entity:
+                class: App\Entity\User
+                property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -9,7 +20,21 @@ security:
         main:
             anonymous: true
             lazy: true
-            provider: users_in_memory
+
+            #firewalls (barrières de feu), quel partie nous allons protéger et par quel moyen
+            # on précise à Symfony que nous allons protéger le contenu principal du site par rapportau provider
+            #'in_database', c'est à dire avec les données des utilisateurs stockés en BDD
+            provider: in_database
+
+            form_login:
+                login_path: security_login
+                check_path: security_login
+            
+            # Pour se déconnecter, Symfony a seulement besoin de la route, il se deconnecte automatiquement
+            logout:
+                path: security_logout
+                target: blog 
+                # a la deconnexion, nous sommes redirigé vers la route 'blog' c'est a dire vers l'affichage des articles
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -20,5 +45,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # On précise à Symfony que seulement les ROLE_ADMIN stockés en BDD auront acces à la route /admin
+         - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+    
+    # Si jamais on tente d'acceder au backOffice mais que dans la BDD, c'est un ROLE_USER, on redirige l'internaute vers l'affichage des articles
+    access_denied_url: /blog

@@ -9,6 +9,9 @@
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
             <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+
         {% endblock %}
 
         
@@ -28,23 +31,38 @@
                         {# La fonction path() Twig permet de définir la route et le chemin du lien <a>, il faut lui fournir le nom de la route (@Route(" ", name="home")) #}
                         <a class="nav-link" href="{{ path('home') }}">Home <span class="sr-only">(current)</span></a>
                     </li>
+
+                    {% if app.user %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Mon compte</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('security_registration') }}">Créer votre compte</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('security_login') }}">Identifiez-vous</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('blog') }}">Affichage des articles</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Catégorie
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </li>
+
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                        <a class="nav-link" href="{{ path('blog_create') }}">Nouvel article</a>
                     </li>
+                    {% if is_granted('ROLE_ADMIN') %}
+
+                        <li>
+                            <a class="nav-link" href="{{ path('admin')}}">BACKOFFICE</a>
+                        </li>
+                    {% endif %}
+
+                    {% if app.user %}
+                        <li class="nav-item">
+                        <a class="nav-link" href="{{ path('security_logout') }}">Déconnexion</a>
+                        </li>
+                    {% endif %}
                     </ul>
                     <form class="form-inline my-2 my-lg-0">
                     <input class="form-control mr-sm-2" type="search" placeholder="Rechercher..." aria-label="Search">

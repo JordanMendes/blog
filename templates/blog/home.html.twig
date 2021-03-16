@@ -17,6 +17,11 @@
 
 {# age : une variable Twig qui est transmise par le controller, via la méthode home() -> render ([]) #}
 
+{# app: variable Twig qui contient toute les informations de la session #}
+{# app.user : contient toute les informations en session de l'utilisateur coneecté #}
+{# {{ dump(app.user) }} #}
+
+{{ dump(app.user) }}
 
 {% if age > 18 %}
     <p>Tu es majeur!! </p>

@@ -1,0 +1,44 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Identifiez-vous
+{% endblock %}
+
+{% block body %}
+
+    <h1 class="display-4 text-center my-5">Identifiez-vous...</h1>
+
+
+    {# app : varaible Twig qui contient toute les informations stockées en session #}
+    {# flashes() : méthode permettant d'accéder aux message utilisateur stockés en session #}
+    {# il peut y avoir plusieurs messages stockés donc nous sommes obligé de boucler #}
+    {% for message in app.flashes('success') %}
+
+        <div class="col-md-5 bg-success p-4 rounded mx-auto text-center text-white mb-3"> {{ message }} </div>
+        {# message est une variable de reception qui contient 1 message utilisateur par tour de boucle #}
+
+    {% endfor %}
+
+    {% if error %}
+
+        <div class="col-md-2 bg-danger p-4 rounded mx-auto text-center text-white mb-3">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {# trans(error.messageData, 'security') : permet de pointer sur le fichier 'translations/security.en.php' qui contient la personnalisation des messages utilisateurs par défaut de Symfony #}
+
+    {% endif %}
+
+    <form method="post" class="col-md-5 mx-auto" action="{{ path('security_login') }}">
+
+        <div class="form-group">
+            <label for="_username">Email</label>
+            <input type="text" class="form-control" id="_username" name="_username" value="{{ lastUsername }}">
+        </div>
+
+        <div class="form-group">
+            <label for="_password">Password</label>
+            <input type="password" class="form-control" id="_password" name="_password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Continuer</button>
+    </form>
+
+{% endblock %}

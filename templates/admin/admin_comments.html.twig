@@ -1,0 +1,46 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    BACKOFFICE | Gestion des commentaires
+{% endblock %}
+
+{% block body %}
+
+    <h1 class=="display-4 text-center my-5">
+        BACKOFFICE | Gestion des commentaires
+    </h1>
+
+    <table class="table table-bordered text-center">
+        <tr>
+            {% for oneColonne in colonnes %}
+
+                {% if oneColonne == 'createdAt' %}
+                    <th>DATE</th>
+                {% elseif oneColonne == 'author'%}
+                    <th>AUTEUR</th>
+                {% else %}
+                    <th>{{ oneColonne|upper }}</th>
+                {% endif %}
+            {% endfor %}
+
+                    <th>TITRE ARTICLE</th>
+
+        </tr>
+
+        {% for oneComment in commentsBdd %}
+            <tr>
+                <td>{{ oneComment.id }}</td>
+                <td>{{ oneComment.author }}</td>
+                <td>{{ oneComment.content|striptags }}</td>
+                <td>{{ oneComment.createdAt|date('d/m/Y à H:i:s') }}</td>
+                <td>{{ oneComment.article.title }}</td>
+
+                <td><a href="" class="btn btn-info"><i class="fa fa-edit"></i></a></td>
+
+                <td><a href="{{ path('admin_remove_comment', {'id': oneComment.id }) }}" class="btn btn-danger" onclick="return(confirm('Voulez-vous vraiment supprimer cet article?'))"><i class="fas fa-trash-alt" ></i></a></td>
+            </tr>
+
+        {% endfor %}
+    </table>
+
+{% endblock %}

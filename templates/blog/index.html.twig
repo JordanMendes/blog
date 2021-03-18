@@ -28,7 +28,7 @@
       {% for data in articles %}
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
-            <img src="{{ data.image }}" alt="{{ data.title}}">
+            <img src="{{ asset('uploads/images/' ~ data.image) }}" alt="{{ data.title}}">
 
             <div class="card-body">
               <h4 class="text-center">{{ data.title }}</h4><hr>

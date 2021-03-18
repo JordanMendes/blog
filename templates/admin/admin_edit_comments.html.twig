@@ -1,0 +1,22 @@
+{% extends "base.html.twig" %}
+
+
+{% block title %}
+    BACKOFFICE | Modification commentaire
+{% endblock %}
+
+
+{% block body %}
+
+    <h1 class="display-4 text-center my-5">BACKOFFICE | Modification commentaire</h1>
+    
+    {{ form_start(formComment, {'attr': {'class': 'col-md-5 mx-auto'}} )}}
+
+        {{ form_row(formComment.author, {'label': "Auteur"}) }}
+
+        {{ form_row(formComment.content, {'label': "Commentaire", "attr": {"rows": 15}}) }}
+
+        <button type="submit" class="btn btn-secondary">Proute</button>
+
+    {{ form_end(formComment) }}
+{% endblock %}

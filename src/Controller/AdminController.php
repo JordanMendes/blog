@@ -2,14 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Article;
 use App\Entity\Comment;
 use App\Entity\Category;
 use App\Form\ArticleFormType;
+use App\Form\CommentFormType;
 use App\Form\CategoryFormType;
+use App\Repository\UserRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\CommentRepository;
 use App\Repository\CategoryRepository;
+use App\Form\AdminRegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -219,6 +223,25 @@ class AdminController extends AbstractController
 
         dump($commentsBdd);
 
+        if($comment)
+        {
+            // On stock l'id du commentaire a supprimer avant d'executer la requete DELETE afin d'injecter l'id du commentaire dans le message de validation
+            $id = $comment->getId();
+            $auteur = $comment->getAuthor(); // on stocke l'auteur du commentaire a supprimé 
+
+            $date = $comment->getCreatedAt();
+            $dateFormat = $date->format('d/m/Y à H:i:s'); // format() --> on formate la date et l'heure
+
+            $manager->remove($comment); // on prépare et on garde en mémoire la requete de suppression (DELETE)
+            $manager->flush(); // on execute la reque de suppression
+
+            // On stock un message de validation en session
+            $this->addFlash('success', "Le commentaire n°$id posté par l'auteur $auteur le $dateFormat a été supprimé avec succes !");
+
+            // Apres la suppression, on redirige l'utilisateur vers l'affichage des commentaires
+            return $this->redirectToRoute('admin_comments');
+        }
+
         return $this->render('admin/admin_comments.html.twig', [
             'colonnes' => $colonnes,
             'commentsBdd' => $commentsBdd
@@ -231,9 +254,110 @@ class AdminController extends AbstractController
      * @Route("/admin/comment/{id}/edit", name="admin_edit_comment")
      * 
      */
-    public function editComment()
+    public function editComment(Comment $comment, EntityManagerInterface $manager, Request $request): Response
     {
-        return $this->render('admin/admin_edit_comments.html.twig');
+        /*
+            1. Importer le formulaire des commentaires dans le controller et le relié à l'entité
+            2. Faites en sorte de récupérer les bonnes valeurs du commentaire à modifier dans les attributs 'value' du formulaire en fonction de l'id commentaire transmit dans l'URL
+            3. Réaliser le traitement permettant de génrer la modification du commentaire à la validation du formulaire
+        */
+        dump($comment);
+
+        $formComment = $this->createForm(CommentFormType::class, $comment);
+
+        $formComment->handleRequest($request);
+
+        if($formComment->isSubmitted() && $formComment->isValid())
+        {
+            $id = $comment->getId();
+            $auteur = $comment->getAuthor();
+            $date = $comment->getCreatedAt();
+            $dateFormat = $date->format('d/m/Y à H:i:s');
+
+            $manager->persist($comment); // on prépare la requete de modification UPDATE
+            $manager->flush(); // on execute la requete UPDATE
+
+            // On définit un message de validation
+            $this->addFlash("success", "Le commentaire n°$id posté par $auteur le $dateFormat a été modifié avec succès !");
+
+            // on redirige l'unternaute apres la modification vers l'affichage des commentaires en BackOffice
+            return $this->redirectToRoute('admin_comments');
+        }
+
+        return $this->render('admin/admin_edit_comments.html.twig', [
+            'formComment' => $formComment->createView()
+        ]);
+    }
+    /**
+     * @Route("/admin/users", name="admin_users")
+     * @Route("/admin/user/{id}/remove", name="admin_remove_user")
+     * @Route("/admin/user/{id}/edit", name="admin_edit_user")
+     */
+    public function adminUsers(EntityManagerInterface $manager, UserRepository $repoUser, User $user = null): Response
+    {
+        /*
+            Affichage de la table SQL user sous forme de tableau HTML : 
+                1. Récupérer le nom des champs / colonnes de la table 'user' afin de les afficher dans les entêtes du tableau HTML 
+                2. Selectionner en BDD toute la table 'user'
+                3. Afficher le contenu de la table sur le template, faites en sorte de ne pas avoir le champ 'password' affiché dans le tableau
+                4. Prévoir des liens : modification / suppression
+        */
+        
+        $colonnes = $manager->getClassMetadata(User::class)->getFieldNames();
+        
+        
+
+        $usersBdd = $repoUser->findAll();
+
+        dump($user);
+
+
+        if($user)
+        {
+            $manager->remove($user);
+
+            $manager->flush();
+
+            $this->addFlash('success', "L'utilisateur a bien été supprmé avec succes !");
+
+            return $this->redirectToRoute('admin_users');
+        }
+
+        return $this->render('admin/admin_users.html.twig', [
+            'colonnes' => $colonnes,
+            'usersBdd' => $usersBdd
+        ]);
+    }
+
+   /**
+    *Méthode permettant de  
+    *
+    * @Route("/admin/user/{id}/edit", name="admin_edit_user")
+    */
+    public function adminUserEdit(USER $user, EntityManagerInterface $manager, Request $request): Response
+    {
+        dump($user);
+
+        $formUser = $this->createForm(AdminRegistrationFormType::class, $user);
+
+        $formUser->handleRequest($request);
+
+        if($formUser->isSubmitted() && $formUser->isValid())
+        {
+            $id = $user->getId();
+            $nom = $user->getUsername();
+
+            $manager->persist($user);
+            $manager->flush();
+
+            $this->addFlash('success', "L'utilisateur $nom ID n°$id a été modifié avec succes !");
+
+            return $this->redirectToRoute('admin_users');
+        }
+
+        return $this->render('admin/admin_edit_user.html.twig', [
+            'formUser' => $formUser->createView()
+        ]);
     }
 }
 

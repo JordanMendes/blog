@@ -20,11 +20,15 @@ class SecurityController extends AbstractController
     public function registration(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder): Response
     {
         // On crée un nouvel exemplaire de l'entité 'User' afin de pouvoir remplir l'objet via le formulaire et de l'insérer en BDD
-        $user = new User;
+        $user = new USER;
+        
 
         // On execute la méthode createForm() du SecurityController afin de créer un formulaire par rapport à la classe RegistrationFormType
         // déstiné à remplir les setter de l'objet entité $user 
-        $formRegistration = $this->createForm(RegistrationFormType::class, $user);
+        $formRegistration = $this->createForm(RegistrationFormType::class, $user, [
+            'validation_groups' => ['registration']
+        ]);
+        // Nous définissions un groupe de validation de contraites afin qu'elles ne soient prise en compte uniquement lors de l'inscription et non lors de la modification dans le BackOffice
 
         dump($request);
 
@@ -43,6 +47,8 @@ class SecurityController extends AbstractController
 
             // On affecte le mot de passe haché directement à l'entité, au setter de l'objet
             $user->setPassword($hash);
+            // Pour chaque nouvelle inscription, l'utilisateur aura par défaut le ROLE_USER
+            $user->setRoles(["ROLE_USER"]);
 
             //dump($user);
 

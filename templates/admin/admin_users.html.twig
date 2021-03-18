@@ -1,0 +1,57 @@
+{% extends "base.html.twig" %}
+
+
+{% block title %}
+    BACKOFFICE | Membre
+{% endblock %}
+
+
+{% block body %}
+    <h1 class="display-4 text-center my-5">BACKOFFICE | Membre</h1>
+
+    {% for message in app.flashes('success') %}
+
+        <div class="col-md-3 bg-success p-4 rounded mx-auto text-center text-white mb-3">
+                {{ message }}
+        </div>
+
+    {% endfor %}
+
+    <table class="table table-bordered text-center">
+        <tr>
+            {% for oneColonne in colonnes %}
+
+                {% if oneColonne == 'username' %}
+                    <th>NOM UTILISATEUR</th>
+                {% elseif oneColonne != 'password'%}
+                    
+                    <th>{{ oneColonne|upper }}</th>
+                {% endif %}
+                
+            {% endfor %}
+
+
+        </tr>
+        {% for oneUser in usersBdd %}
+            <tr>
+                <td>{{ oneUser.id }}</td>
+                <td>{{ oneUser.email }}</td>
+                <td>{{ oneUser.username }}</td>
+
+                {% if oneUser.roles[0] == 'ROLE_ADMIN' %}
+                        <td class="bg-danger text-white">Administrateur</td> 
+                {% else %}
+                        <td>Utilisateur</td>
+                {% endif %}
+
+                <td><a href="{{ path('admin_edit_user', {'id': oneUser.id }) }}" class="btn btn-info"><i class="fa fa-edit"></i></a></td>
+
+                <td><a href="{{ path('admin_remove_user', {'id': oneUser.id }) }}" class="btn btn-danger" onclick="return(confirm('Voulez-vous vraiment supprimer cet utilisateur?'))"><i class="fas fa-trash-alt" ></i></a></td>
+            </tr>
+
+        {% endfor %}
+        
+    </table>
+ 
+    
+{% endblock %}

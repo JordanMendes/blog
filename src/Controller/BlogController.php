@@ -11,6 +11,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -66,7 +68,7 @@ class BlogController extends AbstractController
      * @Route("/blog/new", name="blog_create")
      * @Route("/blog/{id}/edit", name="blog_edit")
      */
-    public function create(Article $articleCreate = null, Request $request, EntityManagerInterface $manager): Response
+    public function create(Article $articleCreate = null, Request $request, EntityManagerInterface $manager, SluggerInterface $slugger): Response
     {
         dump($articleCreate);
 
@@ -132,16 +134,46 @@ class BlogController extends AbstractController
         // alors on entre dans le IF et on génère l'insertion
         if($form->isSubmitted() && $form->isValid())
         {
+            /** @var UploadedFile $imageFile  */
+            $imageFile = $form->get('image')->getData();
+            dump($imageFile);
+
+            if($imageFile)
+            {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                dump($originalFilename);
+
+                $safeFilename = $slugger->slug($originalFilename);
+                dump($safeFilename);
+
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                try // on tente de copier l'image dans le bon dossier sur le serveur
+                {
+                        $imageFile->move(
+                            $this->getParameter('image_directory'),
+                            $newFilename
+                        );
+
+                }
+                catch(FileException $e)
+                {
+
+                }
+                // On envoi l'image définitive dans le setter de l'objet afin que l'image soit stockée en BDD
+                $articleCreate->setImage($newFilename);
+            }
+
             // On appel le setter de la date, puisque nous n'avons pas de champs date dans le formulaire
             if(!$articleCreate->getId())
             {
                 $articleCreate->setCreatedAt(new \DateTime);
             }
 
-            $manager->persist($articleCreate); // on appel le manager pour préparer la requete d'insertion et la garder en mémoire
-            $manager->flush(); // on execute véritablement la requete d'insertion en BDD
+             $manager->persist($articleCreate); // on appel le manager pour préparer la requete d'insertion et la garder en mémoire
+             $manager->flush(); // on execute véritablement la requete d'insertion en BDD
 
-            return $this->redirectToRoute('blog_show', [
+             return $this->redirectToRoute('blog_show', [
                 'id'=> $articleCreate->getId()
             ]);
         }

@@ -24,7 +24,7 @@
     <div class="col-md-8 mx-auto">
           <div class="card mb-4 shadow-sm">
           {# replace() : fonction Twig qui permet de remplacer une donnée par une autre ici dans l'URL#}
-            <img src="{{ articleTwig.image|replace({'600/400': '1000/300'}) }}" alt="{{ articleTwig.title }}">
+            <img src="{{ asset('uploads/images/' ~ articleTwig.image) }}" alt="{{ articleTwig.title }}">
 
             <div class="card-body">
             {# raw : filtre twig qui masque les balises html provenant de la BDD #}

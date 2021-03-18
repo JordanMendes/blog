@@ -10,6 +10,13 @@
         BACKOFFICE | Gestion des commentaires
     </h1>
 
+    {% for message in app.flashes('success') %}
+
+        <div class="col-md-3 bg-success p-4 rounded mx-auto text-center text-white mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
     <table class="table table-bordered text-center">
         <tr>
             {% for oneColonne in colonnes %}
@@ -21,6 +28,7 @@
                 {% else %}
                     <th>{{ oneColonne|upper }}</th>
                 {% endif %}
+                
             {% endfor %}
 
                     <th>TITRE ARTICLE</th>
@@ -35,7 +43,7 @@
                 <td>{{ oneComment.createdAt|date('d/m/Y à H:i:s') }}</td>
                 <td>{{ oneComment.article.title }}</td>
 
-                <td><a href="" class="btn btn-info"><i class="fa fa-edit"></i></a></td>
+                <td><a href="{{ path('admin_edit_comment', {'id': oneComment.id }) }}" class="btn btn-info"><i class="fa fa-edit"></i></a></td>
 
                 <td><a href="{{ path('admin_remove_comment', {'id': oneComment.id }) }}" class="btn btn-danger" onclick="return(confirm('Voulez-vous vraiment supprimer cet article?'))"><i class="fas fa-trash-alt" ></i></a></td>
             </tr>
